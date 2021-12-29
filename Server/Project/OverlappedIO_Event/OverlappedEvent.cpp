@@ -1,6 +1,6 @@
 #include "OverlappedEvent.h"
 
-// ºñµ¿±â IOÃ³¸® (OVERLAPPED IO). ºñµ¿±â IO¿Í OVERLAPPED IO´Â °ÅÀÇ °°Àº¸». °á°ú È®ÀÎÀ» ÀÌº¥Æ®,Äİ¹é¹æ½ÄÀ» Ã¤ÅÃÇÑ°Ô OVERLAPPED IO
+// ë¹„ë™ê¸° IOì²˜ë¦¬ (OVERLAPPED IO). ë¹„ë™ê¸° IOì™€ OVERLAPPED IOëŠ” ê±°ì˜ ê°™ì€ë§. ê²°ê³¼ í™•ì¸ì„ ì´ë²¤íŠ¸,ì½œë°±ë°©ì‹ì„ ì±„íƒí•œê²Œ OVERLAPPED IO
 unsigned int WINAPI CallWorkerThread(LPVOID p)
 {
     OverlappedEvent* pOverlappedEvent = (OverlappedEvent*)p;
@@ -8,7 +8,7 @@ unsigned int WINAPI CallWorkerThread(LPVOID p)
     return 0;
 }
 
-// ¿¬°áÃ³¸®. ÀÌ°Åµµ º¸Åë ¾²·¹µå ÇÏ³ª¸¦ µÎ¾î Ã³¸®ÇÑ´Ù.
+// ì—°ê²°ì²˜ë¦¬. ì´ê±°ë„ ë³´í†µ ì“°ë ˆë“œ í•˜ë‚˜ë¥¼ ë‘ì–´ ì²˜ë¦¬í•œë‹¤.
 unsigned int WINAPI CallAccepterThread(LPVOID p)
 {
     OverlappedEvent* pOverlappedEvent = (OverlappedEvent*)p;
@@ -33,7 +33,7 @@ OverlappedEvent::OverlappedEvent()
     for (i = 0; i < WSA_MAXIMUM_WAIT_EVENTS; ++i)
     {
         m_clientInfo.m_socketClient[i] = INVALID_SOCKET;
-        m_clientInfo.m_eventHandle[i] = WSACreateEvent(); // Manual-reset, Non-signaled»óÅÂ·Î »ı¼º.
+        m_clientInfo.m_eventHandle[i] = WSACreateEvent(); // Manual-reset, Non-signaledìƒíƒœë¡œ ìƒì„±.
         ::ZeroMemory(&m_clientInfo.m_overlappedEx[i], sizeof(OverlappedEx));
     }
 }
@@ -42,14 +42,14 @@ OverlappedEvent::~OverlappedEvent()
 {
     ::WSACleanup();
 
-    // ¸®½¼¼ÒÄÏ ´İ±â.
+    // ë¦¬ìŠ¨ì†Œì¼“ ë‹«ê¸°.
     ::shutdown(m_clientInfo.m_socketClient[0], SD_BOTH);
     ::closesocket(m_clientInfo.m_socketClient[0]);
-    ::SetEvent(m_clientInfo.m_eventHandle[0]); // signaled»óÅÂ·Î ¸¸µç´Ù.
+    ::SetEvent(m_clientInfo.m_eventHandle[0]); // signaledìƒíƒœë¡œ ë§Œë“ ë‹¤.
     m_bWorkerRun = false;
     m_bAccepterRun = false;
 
-    // ¾²·¹µå Á¾·á±îÁö ´ë±â.
+    // ì“°ë ˆë“œ ì¢…ë£Œê¹Œì§€ ëŒ€ê¸°.
     ::WaitForSingleObject(m_hWorkerThread, INFINITE);
     ::WaitForSingleObject(m_hAccepterThread, INFINITE);
 }
@@ -62,29 +62,29 @@ bool OverlappedEvent::InitSocket()
         return false;
     }
 
-    // ¿¬°áÁöÇâÇü TCP, Overlapped I/O ¼ÒÄÏÀ» »ı¼º(¸®½¼ ¼ÒÄÏ)
+    // ì—°ê²°ì§€í–¥í˜• TCP, Overlapped I/O ì†Œì¼“ì„ ìƒì„±(ë¦¬ìŠ¨ ì†Œì¼“)
     m_clientInfo.m_socketClient[0] = ::WSASocket(AF_INET, SOCK_STREAM, 0, 0, 0, WSA_FLAG_OVERLAPPED);
     if (m_clientInfo.m_socketClient[0] == INVALID_SOCKET)
     {
         return false;
     }
 
-    std::cout << "¼ÒÄÏ ÃÊ±âÈ­ ¼º°ø" << std::endl;
+    std::cout << "ì†Œì¼“ ì´ˆê¸°í™” ì„±ê³µ" << std::endl;
 
     return true;
 }
 
 void OverlappedEvent::CloseSocket(SOCKET socketClose, bool bIsForce)
 {
-    // ÀÎÀÚ·Î ³Ñ¾î¿Â ¼ÒÄÏ Á¾·á.
+    // ì¸ìë¡œ ë„˜ì–´ì˜¨ ì†Œì¼“ ì¢…ë£Œ.
 
-    struct linger linger = { 0,0 }; // ¼ÒÄÏ¿É¼Ç SO_DONTLINGER·Î ¼³Á¤ (Áö¿¬¾ÈÇÏ±â)
+    struct linger linger = { 0,0 }; 
 
-    // bIsForce°¡ trueÀÌ¸é SO_LINGER, timeout = 0À¸·Î ¼³Á¤ÇÏ¿© °­Á¦Á¾·á.
+    // bIsForceê°€ trueì´ë©´ SO_LINGER, timeout = 0ìœ¼ë¡œ ì„¤ì •í•˜ì—¬ ê°•ì œì¢…ë£Œ.
     if (bIsForce)
         linger.l_onoff = 1;
 
-    // ´İÀ» ¼ÒÄÏÀÇ ¼Û¼ö½ÅÀ» ¸ğµÎ ´İ´Â´Ù.
+    // ë‹«ì„ ì†Œì¼“ì˜ ì†¡ìˆ˜ì‹ ì„ ëª¨ë‘ ë‹«ëŠ”ë‹¤.
     ::shutdown(socketClose, SD_BOTH);
     ::setsockopt(socketClose, SOL_SOCKET, SO_LINGER, (char*)&linger, sizeof(linger));
     ::closesocket(socketClose);
@@ -105,21 +105,21 @@ bool OverlappedEvent::BindandListen(int nBindPort)
     if (::listen(m_clientInfo.m_socketClient[0], 5) == SOCKET_ERROR)
         return false;
 
-    std::cout << "bind And Listen ¼º°ø! " << std::endl;
+    std::cout << "bind And Listen ì„±ê³µ! " << std::endl;
     return true;
 }
 
 bool OverlappedEvent::StartServer()
 {
-    // Á¢¼ÓµÈ Å¬¶óÀÌ¾ğÆ® ÁÖ¼Ò Á¤º¸¸¦ ÀúÀåÇÒ ±¸Á¶Ã¼.
-    bool bRet = CreateWokerThread(); // ¿öÄ¿ ¾²·¹µå »ı¼º.
+    // ì ‘ì†ëœ í´ë¼ì´ì–¸íŠ¸ ì£¼ì†Œ ì •ë³´ë¥¼ ì €ì¥í•  êµ¬ì¡°ì²´.
+    bool bRet = CreateWokerThread(); // ì›Œì»¤ ì“°ë ˆë“œ ìƒì„±.
     if (bRet == false)
         return false;
     bRet = CreateAccepterThread();
     if (bRet == false)
         return false;
 
-    // Á¤º¸ °»½Å¿ë ÀÌº¥Æ® »ı¼º.
+    // ì •ë³´ ê°±ì‹ ìš© ì´ë²¤íŠ¸ ìƒì„±.
     m_clientInfo.m_eventHandle[0] = ::WSACreateEvent();
 
     return true;
@@ -129,8 +129,8 @@ bool OverlappedEvent::CreateWokerThread()
 {
     UINT threadId = 0;
 
-    // º¸Åë ÀÎÀÚ·Î ÀÚ±âÀÚ½ÅÀ» ³Ñ°ÜÁØ´Ù. ±×·¸±â¿¡ ÀÌ Å¬·¡½º´Â SingletonÀ¸·Î °ü¸®µÇ´Â°Ô ÁÁÀ½.
-    //CREATE_SUSPENDED´Â ResumeThreadÇÔ¼ö¸¦ È£ÃâÇÏ±âÀü±îÁö ¾²·¹µå´Â »ı¼º¸¸µÇ°í ÇÔ¼ö ÁøÀÔ¾ÈÇÔ.
+    // ë³´í†µ ì¸ìë¡œ ìê¸°ìì‹ ì„ ë„˜ê²¨ì¤€ë‹¤. ê·¸ë ‡ê¸°ì— ì´ í´ë˜ìŠ¤ëŠ” Singletonìœ¼ë¡œ ê´€ë¦¬ë˜ëŠ”ê²Œ ì¢‹ìŒ.
+    //CREATE_SUSPENDEDëŠ” ResumeThreadí•¨ìˆ˜ë¥¼ í˜¸ì¶œí•˜ê¸°ì „ê¹Œì§€ ì“°ë ˆë“œëŠ” ìƒì„±ë§Œë˜ê³  í•¨ìˆ˜ ì§„ì…ì•ˆí•¨.
     m_hWorkerThread = (HANDLE)_beginthreadex(NULL, 0, CallWorkerThread, this, CREATE_SUSPENDED, &threadId);
     if (m_hWorkerThread == NULL)
         return false;
@@ -152,10 +152,10 @@ bool OverlappedEvent::CreateAccepterThread()
     return true;
 }
 
-// »ç¿ëµÇÁö ¾Ê´Â ÀÎµ¦½º ¹İÈ¯.
+// ì‚¬ìš©ë˜ì§€ ì•ŠëŠ” ì¸ë±ìŠ¤ ë°˜í™˜.
 int OverlappedEvent::GetEmptyIndex()
 {
-    // 0¹øÂ° ¹è¿­Àº ¸®½¼¼ÒÄÏ¿¡¼­ »ç¿ëµÇ´Â ÀÌº¥Æ® °´Ã¼
+    // 0ë²ˆì§¸ ë°°ì—´ì€ ë¦¬ìŠ¨ì†Œì¼“ì—ì„œ ì‚¬ìš©ë˜ëŠ” ì´ë²¤íŠ¸ ê°ì²´
     for (int i = 1; i < WSA_MAXIMUM_WAIT_EVENTS; ++i)
     {
         if (m_clientInfo.m_socketClient[i] == INVALID_SOCKET)
@@ -178,18 +178,18 @@ bool OverlappedEvent::BindRecv(int nIdx)
     m_clientInfo.m_overlappedEx[nIdx].m_index = nIdx;
     m_clientInfo.m_overlappedEx[nIdx].m_ioType = IO_TYPE::IO_RECV;
 
-    // ¹Ù·Î ¹İÈ¯ÀÌ µÉ¼öµµ ÀÖ°í(recvNumBytes¿¡ ¼ö½Å µ¥ÀÌÅÍ ´ã±ä´Ù) ¾Æ´Ò¼öµµÀÖ´Ù(PENDING)
+    // ë°”ë¡œ ë°˜í™˜ì´ ë ìˆ˜ë„ ìˆê³ (recvNumBytesì— ìˆ˜ì‹  ë°ì´í„° ë‹´ê¸´ë‹¤) ì•„ë‹ìˆ˜ë„ìˆë‹¤(PENDING)
     int ret = ::WSARecv(m_clientInfo.m_socketClient[nIdx], &m_clientInfo.m_overlappedEx[nIdx].m_wsaBuf,
         1, &recvNumBytes, &flag, (LPWSAOVERLAPPED)&m_clientInfo.m_overlappedEx[nIdx], nullptr);
     
     
     
-    // ¿¡·¯ÀÎµ¥ PENDING±îÁö ¾Æ´Ï¶ó¸é Å»Ãâ. (¿¬°áÀÌ ²÷±ä°É·Î ÆÇ´Ü)
+    // ì—ëŸ¬ì¸ë° PENDINGê¹Œì§€ ì•„ë‹ˆë¼ë©´ íƒˆì¶œ. (ì—°ê²°ì´ ëŠê¸´ê±¸ë¡œ íŒë‹¨)
     if (ret == SOCKET_ERROR && ::WSAGetLastError() != WSA_IO_PENDING)
     {
         return false;
     }
-    // ¹Ù·Î ¹İÈ¯µÇ´Â°Í°ú ¹Ù·Î ¹İÈ¯ÀÌ ¾ÈµÇ¸é PENDNGÃ³¸®°¡ µû·ÎµÇ¾î¾ßÇÏÁö¸¸, À§¿¡¼­´Â ±×³É ¹Ù·Î false¶§¸².
+    // ë°”ë¡œ ë°˜í™˜ë˜ëŠ”ê²ƒê³¼ ë°”ë¡œ ë°˜í™˜ì´ ì•ˆë˜ë©´ PENDNGì²˜ë¦¬ê°€ ë”°ë¡œë˜ì–´ì•¼í•˜ì§€ë§Œ, ìœ„ì—ì„œëŠ” ê·¸ëƒ¥ ë°”ë¡œ falseë•Œë¦¼.
     
 
     return true;
@@ -199,10 +199,10 @@ bool OverlappedEvent::SendMsg(int nIdx, char* pMsg, int nLen)
 {
     DWORD recvNumBytes = 0;
 
-    // ¿¡ÄÚ¼­¹ö´Ï ¼ö½Å¹ŞÀº ¸Ş½ÃÁö¸¦ º¹»çÇÑ´Ù.
+    // ì—ì½”ì„œë²„ë‹ˆ ìˆ˜ì‹ ë°›ì€ ë©”ì‹œì§€ë¥¼ ë³µì‚¬í•œë‹¤.
     ::CopyMemory(m_clientInfo.m_overlappedEx[nIdx].m_dataBuffer, pMsg, nLen);
 
-    // Overlapped I/O¸¦ À§ÇÑ ¼ÂÆÃ
+    // Overlapped I/Oë¥¼ ìœ„í•œ ì…‹íŒ…
     m_clientInfo.m_overlappedEx[nIdx].m_wsaOverlapped.hEvent = m_clientInfo.m_eventHandle[nIdx];
     m_clientInfo.m_overlappedEx[nIdx].m_wsaBuf.len = nLen;
     m_clientInfo.m_overlappedEx[nIdx].m_wsaBuf.buf = m_clientInfo.m_overlappedEx[nIdx].m_dataBuffer;
@@ -212,7 +212,7 @@ bool OverlappedEvent::SendMsg(int nIdx, char* pMsg, int nLen)
     int ret = ::WSASend(m_clientInfo.m_socketClient[nIdx], &m_clientInfo.m_overlappedEx[nIdx].m_wsaBuf,
         1, &recvNumBytes, 0, (LPWSAOVERLAPPED)&m_clientInfo.m_overlappedEx[nIdx], nullptr);
 
-    // ¿¡·¯ÀÎµ¥ PENDING±îÁö ¾Æ´Ï¶ó¸é Å»Ãâ. (¿¬°áÀÌ ²÷±ä°É·Î ÆÇ´Ü)
+    // ì—ëŸ¬ì¸ë° PENDINGê¹Œì§€ ì•„ë‹ˆë¼ë©´ íƒˆì¶œ. (ì—°ê²°ì´ ëŠê¸´ê±¸ë¡œ íŒë‹¨)
     if (ret == SOCKET_ERROR && ::WSAGetLastError() != WSA_IO_PENDING)
     {
         return false;
@@ -220,33 +220,33 @@ bool OverlappedEvent::SendMsg(int nIdx, char* pMsg, int nLen)
 
     return true;
 }
-//ÀÏÇÏ´Â ¾²·¹µå. Áï Overlapped I/OÃ³¸® 
+//ì¼í•˜ëŠ” ì“°ë ˆë“œ. ì¦‰ Overlapped I/Oì²˜ë¦¬ 
 void OverlappedEvent::WokerThread()
 {
     while (m_bWorkerRun)
     {
-        // ¿äÃ»ÇÑ  Overlapped I/O ÀÛ¾÷ÀÌ ¿Ï·áµÇ¾ú´ÂÁö ÀÌº¥Æ®¸¦ ±â´Ù¸°´Ù.
+        // ìš”ì²­í•œ  Overlapped I/O ì‘ì—…ì´ ì™„ë£Œë˜ì—ˆëŠ”ì§€ ì´ë²¤íŠ¸ë¥¼ ê¸°ë‹¤ë¦°ë‹¤.
 
         DWORD objIdx = ::WSAWaitForMultipleEvents(WSA_MAXIMUM_WAIT_EVENTS,
             m_clientInfo.m_eventHandle, FALSE, INFINITE, FALSE);
 
-        // ¿¡·¯ ¹ß»ı
+        // ì—ëŸ¬ ë°œìƒ
         if (objIdx == WSA_WAIT_FAILED)
             break;
 
-        // ÀÌº¥Æ®¸¦ ¸®¼Â.
-        ::WSAResetEvent(m_clientInfo.m_eventHandle[objIdx]); // Non-signaled»óÅÂ·Î ¸¸µç´Ù. (SetÀº signaled»óÅÂ·Î ¸¸µë)
+        // ì´ë²¤íŠ¸ë¥¼ ë¦¬ì…‹.
+        ::WSAResetEvent(m_clientInfo.m_eventHandle[objIdx]); // Non-signaledìƒíƒœë¡œ ë§Œë“ ë‹¤. (Setì€ signaledìƒíƒœë¡œ ë§Œë“¬)
 
-        // Á¢¼ÓÀÌ µé¾î¿Ô´Ù.
+        // ì ‘ì†ì´ ë“¤ì–´ì™”ë‹¤.
         if (objIdx == WSA_WAIT_EVENT_0)
             continue;
 
-        //Overlapped IO¿¡ ´ëÇÑ °á°úÃ³¸®
+        //Overlapped IOì— ëŒ€í•œ ê²°ê³¼ì²˜ë¦¬
         OverlappedResult(objIdx);
     }
 }
 
-// »ç¿ëÀÚÀÇ Á¢¼ÓÀ» Ã³¸®ÇÏ´Â ¾²·¹µå ÇÔ¼ö
+// ì‚¬ìš©ìì˜ ì ‘ì†ì„ ì²˜ë¦¬í•˜ëŠ” ì“°ë ˆë“œ í•¨ìˆ˜
 void OverlappedEvent::AccepterThread()
 {
     SOCKADDR_IN clientAddr;
@@ -254,48 +254,48 @@ void OverlappedEvent::AccepterThread()
 
     while (m_bAccepterRun)
     {
-        // Á¢¼ÓÀ» ¹ŞÀ» ±¸Á¶Ã¼ÀÇ ÀÎµ¦½º¸¦ ¾ò¾î¿Â´Ù.
-        int idx = GetEmptyIndex(); // ºó ÀÎµ¦½º. Áï ¹è¿­¿¡¼­ ºó ºÎºĞ.
+        // ì ‘ì†ì„ ë°›ì„ êµ¬ì¡°ì²´ì˜ ì¸ë±ìŠ¤ë¥¼ ì–»ì–´ì˜¨ë‹¤.
+        int idx = GetEmptyIndex(); // ë¹ˆ ì¸ë±ìŠ¤. ì¦‰ ë°°ì—´ì—ì„œ ë¹ˆ ë¶€ë¶„.
 
-        if (idx == -1) // °¡µæÂù »óÈ²(64°³ ¿À¹ö)
+        if (idx == -1) // ê°€ë“ì°¬ ìƒí™©(64ê°œ ì˜¤ë²„)
         {
             return;
         }
 
-        // Å¬¶óÀÌ¾ğÆ® Á¢¼Ó ¿äÃ»ÀÌ µé¾î¿Ã¶§±îÁö ´ë±â.(µ¿±â¹æ½Ä)
+        // í´ë¼ì´ì–¸íŠ¸ ì ‘ì† ìš”ì²­ì´ ë“¤ì–´ì˜¬ë•Œê¹Œì§€ ëŒ€ê¸°.(ë™ê¸°ë°©ì‹)
         m_clientInfo.m_socketClient[idx] = ::accept(m_clientInfo.m_socketClient[0],
             (SOCKADDR*)&clientAddr, &addrLen);
 
         if (m_clientInfo.m_socketClient[idx] == INVALID_SOCKET)
             return;
 
-        // »õ·Î »ı¼ºµÈ ¼ÒÄÏ ÀÌº¥Æ® »ı¼ºÇØÁØ ÈÄ,(ÀÌº¥Æ® ¼¿·ºÆ®¶û ºñ½ÁÇÔ °á±¹ ¼ÒÄÏ == ÀÌº¥Æ® 1´ë1¿¬°á±¸Á¶)
-        // ±×¸®°í WSARecv¸¦ ¹Ì¸® °É¾îµÒ. (ÇØ´ç ¼ÒÄÏÀÇ ÀÔ·Â¹öÆÛ¿¡ ³»¿ë ÀÖÀ¸¸é ÀĞ¾îµéÀÓ)
+        // ìƒˆë¡œ ìƒì„±ëœ ì†Œì¼“ ì´ë²¤íŠ¸ ìƒì„±í•´ì¤€ í›„,(ì´ë²¤íŠ¸ ì…€ë ‰íŠ¸ë‘ ë¹„ìŠ·í•¨ ê²°êµ­ ì†Œì¼“ == ì´ë²¤íŠ¸ 1ëŒ€1ì—°ê²°êµ¬ì¡°)
+        // ê·¸ë¦¬ê³  WSARecvë¥¼ ë¯¸ë¦¬ ê±¸ì–´ë‘ . (í•´ë‹¹ ì†Œì¼“ì˜ ì…ë ¥ë²„í¼ì— ë‚´ìš© ìˆìœ¼ë©´ ì½ì–´ë“¤ì„)
         bool ret = BindRecv(idx); 
         if (ret == false)
             return;
 
-        // Å¬¶óÀÌ¾ğÆ® °³¼ö Áõ°¡
+        // í´ë¼ì´ì–¸íŠ¸ ê°œìˆ˜ ì¦ê°€
         ++m_clientCnt;
 
-        // Å¬¶óÀÌ¾îÆ®°¡ Á¢¼ÓµÇ¾úÀ¸¹Ç·Î WorkerThread¿¡°Ô ÀÌº¥Æ®·Î ¾Ë¸°´Ù.
-        ::WSASetEvent(m_clientInfo.m_eventHandle[0]); // ¸®½¼¼ÒÄÏÀÇ ÀÌº¥Æ®ÀÌÁö¸¸, ¿öÄ¿¾²·¹µå¿ë ÀÌº¥Æ®ÀÌ±âµµÇÔ.
+        // í´ë¼ì´ì–´íŠ¸ê°€ ì ‘ì†ë˜ì—ˆìœ¼ë¯€ë¡œ WorkerThreadì—ê²Œ ì´ë²¤íŠ¸ë¡œ ì•Œë¦°ë‹¤.
+        ::WSASetEvent(m_clientInfo.m_eventHandle[0]); // ë¦¬ìŠ¨ì†Œì¼“ì˜ ì´ë²¤íŠ¸ì´ì§€ë§Œ, ì›Œì»¤ì“°ë ˆë“œìš© ì´ë²¤íŠ¸ì´ê¸°ë„í•¨.
 
     }
 }
 
 void OverlappedEvent::OverlappedResult(int nIdx)
 {
-    DWORD transfer = 0; // ¼Û¼ö½Å¹ŞÀº ¹ÙÀÌÆ®
+    DWORD transfer = 0; // ì†¡ìˆ˜ì‹ ë°›ì€ ë°”ì´íŠ¸
     DWORD flags = 0;
 
-    // PENDINGÀÏ¶§ Ã¼Å©ÇÏ´Â ÇÔ¼öÀÌ±äÇÔ.
+    // PENDINGì¼ë•Œ ì²´í¬í•˜ëŠ” í•¨ìˆ˜ì´ê¸´í•¨.
     bool ret = ::WSAGetOverlappedResult(m_clientInfo.m_socketClient[nIdx],
         (LPWSAOVERLAPPED)&m_clientInfo.m_overlappedEx[nIdx], &transfer, FALSE, &flags);
     if (ret && transfer == 0) 
         return;
 
-    // ¿¬°áÇØÁ¦ ¿äÃ»
+    // ì—°ê²°í•´ì œ ìš”ì²­
     if (transfer == 0)
     {
         ::closesocket(m_clientInfo.m_socketClient[nIdx]);
@@ -303,22 +303,22 @@ void OverlappedEvent::OverlappedResult(int nIdx)
         return;
     }
 
-    // OverlappedEx ÃßÃâ.
+    // OverlappedEx ì¶”ì¶œ.
     OverlappedEx* pOverlappedEx = &m_clientInfo.m_overlappedEx[nIdx];
     switch (pOverlappedEx->m_ioType)
     {
-        // WSARECV·Î Overlapped I/O°¡ ¿Ï·áµÈ °æ¿ì
+        // WSARECVë¡œ Overlapped I/Oê°€ ì™„ë£Œëœ ê²½ìš°
     case IO_TYPE::IO_RECV:
         pOverlappedEx->m_dataBuffer[transfer] = '\0';
-        std::cout << "[¼ö½Å] bytes : " << transfer << " msg : " << pOverlappedEx->m_dataBuffer << std::endl;
+        std::cout << "[ìˆ˜ì‹ ] bytes : " << transfer << " msg : " << pOverlappedEx->m_dataBuffer << std::endl;
 
-        //Å¬¶óÀÌ¾ğÆ®¿¡°Ô ¿¡ÄÚ
+        //í´ë¼ì´ì–¸íŠ¸ì—ê²Œ ì—ì½”
         SendMsg(nIdx, pOverlappedEx->m_dataBuffer, transfer);
         break;
     case IO_TYPE::IO_SEND:
         pOverlappedEx->m_dataBuffer[transfer] = '\0';
-        std::cout << "[¼Û½Å] bytes : " << transfer << " msg : " << pOverlappedEx->m_dataBuffer << std::endl;
-        BindRecv(nIdx); // ´Ù½Ã Recv°É¾îÁØ´Ù. 
+        std::cout << "[ì†¡ì‹ ] bytes : " << transfer << " msg : " << pOverlappedEx->m_dataBuffer << std::endl;
+        BindRecv(nIdx); // ë‹¤ì‹œ Recvê±¸ì–´ì¤€ë‹¤. 
         break;
 
     default:
@@ -331,7 +331,7 @@ void OverlappedEvent::OverlappedResult(int nIdx)
 void OverlappedEvent::DestroyThread()
 {
     ::shutdown(m_clientInfo.m_socketClient[0], SD_BOTH);
-    ::closesocket(m_clientInfo.m_socketClient[0]); // ¸®½¼¼ÒÄÏ ÆÄ±«
+    ::closesocket(m_clientInfo.m_socketClient[0]); // ë¦¬ìŠ¨ì†Œì¼“ íŒŒê´´
     ::SetEvent(m_clientInfo.m_eventHandle[0]);
     m_bWorkerRun = false;
     m_bAccepterRun = false;
