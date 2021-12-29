@@ -318,7 +318,7 @@ void OverlappedEvent::OverlappedResult(int nIdx)
     case IO_TYPE::IO_SEND:
         pOverlappedEx->m_dataBuffer[transfer] = '\0';
         std::cout << "[송신] bytes : " << transfer << " msg : " << pOverlappedEx->m_dataBuffer << std::endl;
-        BindRecv(nIdx); // 다시 Recv걸어준다. 
+        BindRecv(nIdx); // 다시 Recv걸어준다. 중요!
         break;
 
     default:
