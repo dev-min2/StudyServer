@@ -225,8 +225,9 @@ void OverlappedEvent::WokerThread()
 {
     while (m_bWorkerRun)
     {
-        // 요청한  Overlapped I/O 작업이 완료되었는지 이벤트를 기다린다.
-
+        // 요청한  Overlapped I/O 작업이 완료되었는지 이벤트를 기다린다. 
+        // WSASend,WSARecv - 비동기 IO의 요청이 완료되면 이벤트 커널 객체는 signaled상태가 된다.
+        
         DWORD objIdx = ::WSAWaitForMultipleEvents(WSA_MAXIMUM_WAIT_EVENTS,
             m_clientInfo.m_eventHandle, FALSE, INFINITE, FALSE);
 
@@ -234,10 +235,10 @@ void OverlappedEvent::WokerThread()
         if (objIdx == WSA_WAIT_FAILED)
             break;
 
-        // 이벤트를 리셋.
+        // 이벤트를 리셋. (manual-reset모드이기에 다시 닫아줘야함)
         ::WSAResetEvent(m_clientInfo.m_eventHandle[objIdx]); // Non-signaled상태로 만든다. (Set은 signaled상태로 만듬)
 
-        // 접속이 들어왔다.
+        // 접속이 들어왔다. (accepterThread)
         if (objIdx == WSA_WAIT_EVENT_0)
             continue;
 
