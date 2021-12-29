@@ -290,7 +290,6 @@ void OverlappedEvent::OverlappedResult(int nIdx)
     DWORD transfer = 0; // 송수신받은 바이트
     DWORD flags = 0;
 
-    // PENDING일때 체크하는 함수이긴함.
     bool ret = ::WSAGetOverlappedResult(m_clientInfo.m_socketClient[nIdx],
         (LPWSAOVERLAPPED)&m_clientInfo.m_overlappedEx[nIdx], &transfer, FALSE, &flags);
     if (ret && transfer == 0) 
