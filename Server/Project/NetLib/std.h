@@ -17,3 +17,4 @@
 #define SERVER_IP "127.0.0.1"
 #define PORT_NUM 9123
 #define BUF_SIZE 1024
+#define MAX_RINGBUFSIZE	1024 * 100
