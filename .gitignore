@@ -176,3 +176,10 @@ Server/Project/Test/Test.vcxproj.user
 Server/Project/Test/Test.vcxproj.filters
 Server/Project/Test/Test.vcxproj
 Server/Project/Test/Test.cpp
+Server/.vs/Server/v16/ipch/AutoPCH/9bd8899c76c7c958/SINGLETON.ipch
+Server/.vs/Server/v16/ipch/AutoPCH/56ed5827ebfbb259/SINGLETON.ipch
+Server/.vs/Server/v16/ipch/AutoPCH/af39740f86fdba08/UTILMANAGER.ipch
+Server/Output/Test/obj/UtilManager.obj
+Server/NetLib/obj/Singleton.obj
+Server/Project/Test/UtilManager.h
+Server/Project/Test/UtilManager.cpp
