@@ -108,14 +108,6 @@ bool IOCompletionPort::BindandListen(int nBindPort)
 
 bool IOCompletionPort::StartServer()
 {
-	bool bRet = CreateWokerThread();
-	if (bRet == false)
-		return false;
-	bRet = CreateAccepterThread();
-	if (bRet == false)
-		return false;
-
-
 	// ★ CP객체 생성
 	m_hCompletionPort = ::CreateIoCompletionPort(INVALID_HANDLE_VALUE, 0, 0, 0);
 	if (m_hCompletionPort == INVALID_HANDLE_VALUE)
@@ -123,6 +115,13 @@ bool IOCompletionPort::StartServer()
 		std::cout << "CP객체 생성 실패" << std::endl;
 		return false;
 	}
+
+	bool bRet = CreateWokerThread();
+	if (bRet == false)
+		return false;
+	bRet = CreateAccepterThread();
+	if (bRet == false)
+		return false;
 
 	std::cout << "서버 시작..." << std::endl;
 
