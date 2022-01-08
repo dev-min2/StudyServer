@@ -1,7 +1,7 @@
 #include "RingBuffer.h"
 
 RingBuffer::RingBuffer() : m_pRingBuffer(nullptr),m_pBeginMark(nullptr),m_pEndMark(nullptr),m_pCurrentMark(nullptr),
-m_pGettedBufferMark(nullptr),m_pLastMoveMark(nullptr),m_usedBufferSize(0),m_allUserBufSize(0)
+m_pGettedBufferMark(nullptr),m_pLastMoveMark(nullptr),m_usedBufferSize(0),m_allUsedBufSize(0)
 {
     
 }
@@ -21,7 +21,7 @@ bool RingBuffer::Initialize()
         m_pCurrentMark = m_pBeginMark;
         m_pGettedBufferMark = m_pBeginMark;
         m_pLastMoveMark = m_pEndMark;
-        m_allUserBufSize = 0;
+        m_allUsedBufSize = 0;
     }
     return true;
 }
@@ -67,7 +67,7 @@ char* RingBuffer::ForwardMark(int forwardLen)
             pPreCurrentMark = m_pBeginMark;
         }
         m_usedBufferSize += forwardLen;
-        m_allUserBufSize += forwardLen;
+        m_allUsedBufSize += forwardLen;
     }
     return pPreCurrentMark;
 }
@@ -91,7 +91,7 @@ char* RingBuffer::ForwardMark(int forwardLen, int nextLen, DWORD remainLen)
             m_pCurrentMark = m_pBeginMark + remainLen;
         }
         m_usedBufferSize += forwardLen;
-        m_allUserBufSize += forwardLen;
+        m_allUsedBufSize += forwardLen;
     }
     return m_pCurrentMark;
 }

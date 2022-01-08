@@ -33,9 +33,6 @@ void className::ReleaseInstance()\
 
 #include <list>
 
-
-
-
 class Singleton
 {
 public:
