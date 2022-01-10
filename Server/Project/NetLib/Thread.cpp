@@ -1,3 +1,4 @@
+
 #include "Thread.h"
 
 Thread::Thread() : m_hThread(INVALID_HANDLE_VALUE),m_bRunState(false),m_tickCount(0),m_waitTick(0)
